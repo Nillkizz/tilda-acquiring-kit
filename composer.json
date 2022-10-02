@@ -1,0 +1,23 @@
+{
+    "name": "nillkizz/form_acquiring",
+    "description": "Custom form acquiring handler",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        },
+        "files": [
+          "src/helpers.php",
+          "src/functions.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "nillkizz",
+            "email": "alx.n.smith@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.4"
+    }
+}

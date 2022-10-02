@@ -1,0 +1,11 @@
+.env
+
+# Composer
+composer.phar
+composer.lock
+
+# Vendor
+vendor/
+
+# IDE
+.idea/
