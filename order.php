@@ -2,6 +2,7 @@
 
 use App\Models\Order;
 use App\Services\Payments\Tinkoff;
+use App\Services\Pushka;
 
 require 'config.php';
 
@@ -11,7 +12,16 @@ if (has_get_fields(['update_status'])) {
   $status = $data['Status'];
 
   $order = Order::get($order_id);
-  $order->set_status($status);
+
+  $order->status = $status;
+
+  if ($status == 'CONFIRMED') {
+    $order->payment_datetime = time();
+    $order->payment_amount = $data['Amount'] / 100;
+  }
+
+  $order->save();
+  Pushka::register_ticket($order);
 
   print_r($order);
   die();

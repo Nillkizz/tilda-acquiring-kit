@@ -10,6 +10,7 @@ namespace App\Models;
  * @method static Order create(array $order_data) Create order from array
  * @method static void set_status(string $status) Set order status
  * @method static array toArray() Get order data as array
+ * @method string get_full_name() Get full name of order owner
  * 
  * @property int $id
  * @property string $order_id
@@ -32,7 +33,9 @@ class Order
   private $_changed_fields;
 
   const editable = [
-    'status'
+    'status',
+    'payment_datetime',
+    'payment_amount'
   ];
 
   function __construct($order_data)
@@ -102,6 +105,12 @@ class Order
 
     $order_data['order_id'] = time() . mt_rand();
     $order_data['status'] = 'CREATED';
+    $order_data['payment_datetime'] = null;
+    $order_data['payment_amount'] = null;
+
+    $phone = preg_replace('/[^0-9]/', '', $order_data['phone']);
+    $phone = substr($phone, -10);
+    $order_data['phone'] = $phone;
 
     $db->exec("INSERT INTO orders (
       lastname, 
@@ -113,7 +122,7 @@ class Order
       payment_method, 
       form_id, 
       order_type,
-      'status'
+      status
       ) 
     VALUES (
       '{$order_data['lastname']}', 
@@ -131,13 +140,11 @@ class Order
     return new Order($order_data);
   }
 
-  function set_status($status)
+  function get_full_name()
   {
-    $this->status = $status;
-    $this->save();
+    return "{$this->lastname} {$this->name} {$this->middlename}";
   }
 
-  // To array magic method return order_data
   function toArray()
   {
     return $this->_order_data;

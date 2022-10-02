@@ -15,5 +15,8 @@ $db->exec("
   form_id TEXT,
   status TEXT,
 
+  payment_datetime TEXT,
+  payment_amount INT,
+
   CONSTRAINT unique_order_id UNIQUE (order_id)
 )");

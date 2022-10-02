@@ -1,4 +1,5 @@
 .env
+db.sqlite
 
 # Composer
 composer.phar

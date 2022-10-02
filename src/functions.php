@@ -12,11 +12,11 @@ function parse_order()
     'lastname' => 'lastname',
     'name' => 'name',
     'middlename' => 'middlename',
-    'Phone' => 'phone',
-    'Email' => 'email',
+    'phone' => 'Phone',
+    'email' => 'Email',
     'payment_method' => 'payment_method',
-    'tildaspec-formid' => 'form_id',
-    'orderType' => 'order_type'
+    'form_id' => 'tildaspec-formid',
+    'order_type' => 'orderType'
   ]);
   return $order;
 }

@@ -14,19 +14,17 @@ function has_keys($needle_keys, $array)
 }
 
 /**
- * Rename array keys
+ * Make new array by keys
  * @param array $array Data array
- * @param array $mapping Array Key replcemnent
+ * @param array $mapping Array New Key => Key
  * 
  * @return array Renamed array
  */
 function map_array($array, $mapping)
 {
   $result = [];
-  foreach ($array as $key => $value) {
-    if (isset($mapping[$key])) {
-      $result[$mapping[$key]] = $value;
-    }
+  foreach ($mapping as $new_key => $key) {
+    $result[$new_key] = $array[$key];
   }
   return $result;
 }
@@ -46,4 +44,23 @@ function has_post_fields($keys)
 function has_get_fields($keys)
 {
   return has_keys($keys, $_GET);
+}
+
+function env($key, $default = null)
+{
+  if (!isset($_ENV[$key])) return $default;
+  return $_ENV[$key];
+}
+
+function session_date($date = null)
+{
+  // If date is null - return tomorrow
+  if ($date == null) {
+    $date = date('Y-m-d', time() + 86400);
+  }
+  // If date is string - convert to timestamp
+  if (is_string($date)) {
+    $date = strtotime($date);
+  }
+  return $date;
 }
