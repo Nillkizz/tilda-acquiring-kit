@@ -42,12 +42,12 @@ class Pushka
     $response = json_decode($response, true);
 
     w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Response status: " . $status . "\nResponse: " . print_r($response, true));
-    if ($status != 200) {
+    if ($status == 400) {
       w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Request Error: " . ' [' . $response['code'] . '] ' . $response['description']);
       throw new \Exception("Pushka API error: " . $response['description']);
     }
 
-    w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Response: " . $response);
+    w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Response: " . print_r($response, true));
 
     return $response;
   }
