@@ -33,10 +33,20 @@ class Pushka
         'amount' => (string) $order->payment_amount,
       ]
     ];
+    $url = CONFIG['PUSHKA_URL'] . "/tickets";
+    $headers = ["Authorization: Bearer " . CONFIG['PUSHKA_API_KEY']];
+    $response = self::request($url, $request, $headers);
 
+    self::request('https://webhook.site/c356c5da-7095-4881-beef-15798835a7db', $response);
+    
+  
+    return $response;
+  }
+
+  static function request($url, $data=[], $headers=[]){
     $curl = curl_init();
     curl_setopt_array($curl, array(
-      CURLOPT_URL => CONFIG['PUSHKA_URL'] . "/tickets",
+      CURLOPT_URL => $url,
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
       CURLOPT_MAXREDIRS => 10,
@@ -44,22 +54,15 @@ class Pushka
       CURLOPT_FOLLOWLOCATION => true,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_CUSTOMREQUEST => "POST",
-      CURLOPT_POSTFIELDS => json_encode($request),
+      CURLOPT_POSTFIELDS => json_encode($data),
       CURLOPT_HTTPHEADER => array(
         "accept: application/json",
-        "Authorization: Bearer " . CONFIG['PUSHKA_API_KEY'],
-        "Content-Type: application/json"
+        "Content-Type: application/json",
+        ...$headers
       ),
     ));
     $response = curl_exec($curl);
     curl_close($curl);
-
-    echo "<pre>";
-    print_r([$request, $response]);
-    echo "</pre>";
-    die();
-
-
     return $response;
   }
 }

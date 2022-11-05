@@ -19,12 +19,10 @@ if (has_get_fields(['update_status'])) {
     $order->payment_datetime = time();
     $order->payment_amount = $data['Amount'] / 100;
   }
-
+  
   $order->save();
   Pushka::register_ticket($order);
 
-  print_r($order);
-  die();
 }
 
 if (has_get_fields(['create'])) {
@@ -36,10 +34,5 @@ if (has_get_fields(['create'])) {
   $response = json_encode(Tinkoff::prepare_response($response_data));
 
   header('Content-Type: application/json');
-  // echo json_encode($response_data);
   echo $response;
 }
-
-
-
-// echo $response;
