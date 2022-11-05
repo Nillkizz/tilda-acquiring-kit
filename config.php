@@ -18,6 +18,7 @@ $dotenv->required([
 ]);
 
 define('CONFIG', [
+  "DEBUG" => (bool) env("DEBUG", false),
   "DB_PATH" =>  env("DB_PATH", 'db.sqlite'),
   "EMAIL_COMPANY" => env("EMAIL_COMPANY"),
 

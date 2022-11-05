@@ -67,11 +67,23 @@ function session_date($date = null)
 
 function w_log($message, $level = "Debug")
 {
+  if (!(bool)env('DEBUG')) return;
   global $logger;
+
   if (!isset($logg)) {
     $logger = new Monolog\Logger('app');
-    $logger->pushHandler(new Monolog\Handler\StreamHandler('logs/app.log'));
+    $handler = new Monolog\Handler\RotatingFileHandler('logs/app.log', 5);
+
+    $formatter = new Monolog\Formatter\LineFormatter(
+      null, // Format of message in log, default [%datetime%] %channel%.%level_name%: %message% %context% %extra%\n
+      null, // Datetime format
+      true, // allowInlineLineBreaks option, default false
+      true  // discard empty Square brackets in the end, default false
+    );
+    $handler->setFormatter($formatter);
+    $logger->pushHandler($handler);
   }
+
   $level = (new ReflectionEnum("Monolog\Level"))->getCase($level)->getValue();
   $logger->log($level, $message);
 }

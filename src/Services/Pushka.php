@@ -8,6 +8,7 @@ class Pushka
 {
   static function register_ticket(Order $order)
   {
+
     $order_data = $order->toArray();
     $request = [
       ...map_array($order_data, [
@@ -35,15 +36,24 @@ class Pushka
     ];
     $url = CONFIG['PUSHKA_URL'] . "/tickets";
     $headers = ["Authorization: Bearer " . CONFIG['PUSHKA_API_KEY']];
-    $response = self::request($url, $request, $headers);
+    w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Request: " . print_r($request, true));
 
-    self::request('https://webhook.site/c356c5da-7095-4881-beef-15798835a7db', $response);
-    
-  
+    ['status' => $status, 'response' => $response] = self::request($url, $request, $headers);
+    $response = json_decode($response, true);
+
+    w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Response status: " . $status . "\nResponse: " . print_r($response, true));
+    if ($status != 200) {
+      w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Request Error: " . ' [' . $response['code'] . '] ' . $response['description']);
+      throw new \Exception("Pushka API error: " . $response['description']);
+    }
+
+    w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Response: " . $response);
+
     return $response;
   }
 
-  static function request($url, $data=[], $headers=[]){
+  static function request($url, $data = [], $headers = [])
+  {
     $curl = curl_init();
     curl_setopt_array($curl, array(
       CURLOPT_URL => $url,
@@ -62,7 +72,8 @@ class Pushka
       ),
     ));
     $response = curl_exec($curl);
+    $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
     curl_close($curl);
-    return $response;
+    return ['status' => $status, 'response' => $response];
   }
 }

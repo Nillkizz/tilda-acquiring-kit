@@ -85,13 +85,15 @@ class Order
   /**
    * Get order by id
    * @param $order_id int
-   * @return Order
+   * @return Order|False
    */
   static function get($order_id)
   {
     global $db;
 
     $order = $db->query("SELECT * FROM orders WHERE order_id = '{$order_id}'")->fetchArray(SQLITE3_ASSOC);
+    if (!$order) return false;
+
     return new Order($order);
   }
 
