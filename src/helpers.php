@@ -64,3 +64,14 @@ function session_date($date = null)
   }
   return $date;
 }
+
+function w_log($message, $level = "Debug")
+{
+  global $logger;
+  if (!isset($logg)) {
+    $logger = new Monolog\Logger('app');
+    $logger->pushHandler(new Monolog\Handler\StreamHandler('logs/app.log'));
+  }
+  $level = (new ReflectionEnum("Monolog\Level"))->getCase($level)->getValue();
+  $logger->log($level, $message);
+}

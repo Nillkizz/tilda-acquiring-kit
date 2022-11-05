@@ -19,10 +19,9 @@ if (has_get_fields(['update_status'])) {
     $order->payment_datetime = time();
     $order->payment_amount = $data['Amount'] / 100;
   }
-  
+
   $order->save();
   Pushka::register_ticket($order);
-
 }
 
 if (has_get_fields(['create'])) {
