@@ -4,13 +4,20 @@ namespace App\Services\Payments;
 
 class Tinkoff
 {
-  const terminal_key = '1659434365168DEMO';
-  const terminal_password = '5eb2vnfbjqyfrik0';
+
+  static function get_terminal_key()
+  {
+    return $_ENV['TINKOFF_TERMINAL_KEY'];
+  }
+  static function get_terminal_password()
+  {
+    return $_ENV['TINKOFF_TERMINAL_PASSWORD'];
+  }
 
   static function get_payment_data($order, $item)
   {
     $payment_data = [
-      "TerminalKey" => self::terminal_key,
+      "TerminalKey" => self::get_terminal_key(),
       "Amount" =>  $item['price'],
       "OrderId" => $order['order_id'],
       "DATA" => [
