@@ -31,11 +31,13 @@ if (has_get_fields(['update_status'])) {
     $order->payment_datetime = time();
     $order->payment_amount = $data['Amount'] / 100;
     w_log("order.php | Update_status | Order({$order_id}) payment updated: "  . $order->payment_amount);
+    w_log("order.php | Update_status | Order({$order_id}) saved");
+    $response = Pushka::register_ticket($order);
+	  
+	  $order->ticket_id = $response['id'];
   }
 
   $order->save();
-  w_log("order.php | Update_status | Order({$order_id}) saved");
-  Pushka::register_ticket($order);
 }
 
 if (has_get_fields(['create'])) {
