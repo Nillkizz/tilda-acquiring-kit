@@ -68,7 +68,7 @@ class Pushka
             'refund_reason' => 'Посещение отменено',
         ];
         w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | Request: ".print_r($body, true));
-        [ 'status' => $status, 'response' => $response ] = self::put($url, $body, static::authenticate_headers());
+        ['status' => $status, 'response' => $response] = self::put($url, $body, static::authenticate_headers());
         $response = json_decode($response, true);
         w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | Response status: ".$status."\nResponse: ".print_r($response, true));
         if ($status == 400) {
@@ -84,6 +84,7 @@ class Pushka
     public static function request($url, $opts = ['method' => 'GET', 'headers' => []])
     {
         extract($opts);
+        $curl = curl_init();
         $curl_options = [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
