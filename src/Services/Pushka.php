@@ -99,7 +99,7 @@ class Pushka
                 ...$headers,
             ],
         ];
-        if ($method == 'POST') {
+        if ($method == 'POST' || $method == 'PUT') {
             $curl_options[CURLOPT_POSTFIELDS] = json_encode($opts['body']);
         }
         curl_setopt_array($curl, $curl_options);
