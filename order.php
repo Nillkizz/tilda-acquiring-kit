@@ -35,6 +35,11 @@ if (has_get_fields(['update_status'])) {
     $response = Pushka::register_ticket($order);
 	  
 	  $order->ticket_id = $response['id'];
+  } else if ($status == 'REJECTED') {
+    w_log("order.php | Update_status | Order({$order_id}) rejected");
+  } else if ($status == 'CANCELED') {
+    w_log("order.php | Update_status | Order({$order_id}) canceled");
+    $response = Pushka::refund_ticket($order);
   }
 
   $order->save();
