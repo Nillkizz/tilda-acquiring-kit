@@ -30,21 +30,22 @@ if (has_get_fields(['update_status'])) {
     w_log("order.php | Update_status | Order({$order_id}) status updated: ".$status);
 
     if ($status == 'CONFIRMED') {
+        w_log("order.php | Update_status | Confirm Order({$order_id})");
         $order->payment_datetime = time();
         $order->payment_amount = $data['Amount'] / 100;
-        w_log("order.php | Update_status | Order({$order_id}) payment updated: ".$order->payment_amount);
-        w_log("order.php | Update_status | Order({$order_id}) saved");
         $response = Pushka::register_ticket($order);
-
-        $order->ticket_id = $response['id'];
+        $order->set_ticket_id($response['id']);
+        w_log("order.php | Update_status | Order({$order_id}) Confirmed | Ticket registered: ".$order->ticket_id);
     } elseif ($status == 'REJECTED') {
         w_log("order.php | Update_status | Order({$order_id}) rejected");
     } elseif ($status == 'CANCELED') {
-        w_log("order.php | Update_status | Order({$order_id}) canceled");
+        w_log("order.php | Update_status | Cancel Order({$order_id})");
         $response = Pushka::refund_ticket($order);
+        w_log("order.php | Update_status | Order({$order_id}) canceled");
     }
 
     $order->save();
+    w_log("order.php | Update_status | Order({$order_id}) saved");
 }
 
 if (has_get_fields(['create'])) {
