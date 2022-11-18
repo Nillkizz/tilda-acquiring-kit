@@ -123,12 +123,6 @@ class Pushka
 
     public static function put($url, $data = [], $headers = [])
     {
-        $args = [
-            'method' => 'PUT',
-            'body' => json_encode($data),
-            'headers' => $headers,
-        ];
-
-        return self::request($url, $args);
+        return self::request($url, ['method' => 'PUT', 'body' => $data, 'headers' => $headers]);
     }
 }
