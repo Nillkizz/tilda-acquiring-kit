@@ -6,9 +6,11 @@ use App\Models\Order;
 
 class Pushka
 {
-    public static function get_auth_headers()
+    public static function authenticate_headers($headers = [])
     {
-        return ['Authorization: Bearer '.CONFIG['PUSHKA_API_KEY']];
+        $headers[] = 'Authorization: Bearer '.CONFIG['PUSHKA_API_KEY'];
+
+        return $headers;
     }
 
     public static function register_ticket(Order $order)
@@ -41,7 +43,7 @@ class Pushka
         $url = CONFIG['PUSHKA_URL'].'/tickets';
         w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Request: ".print_r($request, true));
 
-        ['status' => $status, 'response' => $response] = self::request($url, $request, static::get_auth_headers());
+        ['status' => $status, 'response' => $response] = self::post($url, $request, static::authenticate_headers());
         $response = json_decode($response, true);
 
         w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Response status: ".$status."\nResponse: ".print_r($response, true));
@@ -59,12 +61,14 @@ class Pushka
     {
         $ticket_id = $order->ticket_id;
         w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | ticket_id: ".$ticket_id);
+        $url = CONFIG['PUSHKA_URL'].'/tickets';
         $url = CONFIG['PUSHKA_URL']."/tickets/{$ticket_id}/refund";
         $body = [
             'refund_date' => time(),
             'refund_reason' => 'Посещение отменено',
         ];
-        [ 'status' => $status, 'response' => $response ] = self::request($url, $body, static::get_auth_headers());
+        w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | Request: ".print_r($body, true));
+        [ 'status' => $status, 'response' => $response ] = self::put($url, $body, static::authenticate_headers());
         $response = json_decode($response, true);
         w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | Response status: ".$status."\nResponse: ".print_r($response, true));
         if ($status == 400) {
@@ -77,10 +81,10 @@ class Pushka
         return $response;
     }
 
-    public static function request($url, $data = [], $headers = [])
+    public static function request($url, $opts = ['method' => 'GET', 'headers' => []])
     {
-        $curl = curl_init();
-        curl_setopt_array($curl, [
+        extract($opts);
+        $curl_options = [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
@@ -88,18 +92,42 @@ class Pushka
             CURLOPT_TIMEOUT => 0,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => [
                 'accept: application/json',
                 'Content-Type: application/json',
                 ...$headers,
             ],
-        ]);
+        ];
+        if ($method == 'POST') {
+            $curl_options[CURLOPT_POSTFIELDS] = json_encode($opts['body']);
+        }
+        curl_setopt_array($curl, $curl_options);
         $response = curl_exec($curl);
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
         return ['status' => $status, 'response' => $response];
+    }
+
+    public static function get($url, $headers = [])
+    {
+        return self::request($url, ['method' => 'GET', 'headers' => $headers]);
+    }
+
+    public static function post($url, $body, $headers = [])
+    {
+        return self::request($url, ['method' => 'POST', 'body' => $body, 'headers' => $headers]);
+    }
+
+    public static function put($url, $data = [], $headers = [])
+    {
+        $args = [
+            'method' => 'PUT',
+            'body' => json_encode($data),
+            'headers' => $headers,
+        ];
+
+        return self::request($url, $args);
     }
 }
