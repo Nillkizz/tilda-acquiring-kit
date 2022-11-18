@@ -3,15 +3,15 @@
 namespace App\Models;
 
 /**
- * Order model class 
- * 
+ * Order model class
+ *
  * @method static Order get(int $id) Get order by id from database
  * @method static void save() Save order to database
  * @method static Order create(array $order_data) Create order from array
  * @method static void set_status(string $status) Set order status
  * @method static array toArray() Get order data as array
  * @method string get_full_name() Get full name of order owner
- * 
+ *
  * @property int $id
  * @property string $order_id
  * @property string $lastname
@@ -23,98 +23,107 @@ namespace App\Models;
  * @property string $order_type
  * @property string $form_id
  * @property string $status
- * 
  * @property array $_order_data Order data private field
  * @property array $_changed_fields Changed fields private field, used for update query
  */
 class Order
 {
-  private $_order_data;
-  private $_changed_fields;
+    private $_order_data;
 
-  const editable = [
-    'status',
-    'payment_datetime',
-    'payment_amount'
-  ];
+    private $_changed_fields;
 
-  function __construct($order_data)
-  {
-    $this->_order_data = $order_data;
-    $this->_changed_fields = [];
-  }
+    const editable = [
+        'status',
+        'payment_datetime',
+        'payment_amount',
+    ];
 
-  // Magic getter method for order_data
-  function __get($name)
-  {
-    if ($name == 'changed_fields') return $this->changed_fields;
-
-    $value = $this->_order_data[$name];
-    return $value;
-  }
-
-  // Magic setter method for order_data
-  function __set($name, $value)
-  {
-    // If name starts with _, then it is a private property
-    if (substr($name, 0, 2) == '_') {
-      $this->$name = $value;
-      return;
+    public function __construct($order_data)
+    {
+        $this->_order_data = $order_data;
+        $this->_changed_fields = [];
     }
 
-    if (!in_array($name, self::editable)) return;
-    $this->_order_data[$name] = $value;
-    $this->_changed_fields[] = $name;
-  }
-  // Save method for update all fields
-  function save()
-  {
-    global $db;
+    // Magic getter method for order_data
+    public function __get($name)
+    {
+        if ($name == 'changed_fields') {
+            return $this->changed_fields;
+        }
 
-    $query = "UPDATE orders SET ";
-    foreach ($this->_changed_fields as $field) {
-      $query .= "{$field} = '{$this->_order_data[$field]}', ";
+        $value = $this->_order_data[$name];
+
+        return $value;
     }
-    $query = substr($query, 0, -2);
-    $query .= " WHERE order_id = '{$this->order_id}'";
-    $db->exec($query);
-    $this->_changed_fields = [];
-  }
 
+    // Magic setter method for order_data
+    public function __set($name, $value)
+    {
+        // If name starts with _, then it is a private property
+        if (substr($name, 0, 2) == '_') {
+            $this->$name = $value;
 
-  /**
-   * Get order by id
-   * @param $order_id int
-   * @return Order|False
-   */
-  static function get($order_id)
-  {
-    global $db;
+            return;
+        }
 
-    $order = $db->query("SELECT * FROM orders WHERE order_id = '{$order_id}'")->fetchArray(SQLITE3_ASSOC);
-    if (!$order) return false;
+        if (! in_array($name, self::editable)) {
+            return;
+        }
+        $this->_order_data[$name] = $value;
+        $this->_changed_fields[] = $name;
+    }
 
-    return new Order($order);
-  }
+    // Save method for update all fields
+    public function save()
+    {
+        global $db;
 
-  /**
-   * @param $order_data array
-   * @return Order saved order
-   */
-  static function create($order_data)
-  {
-    global $db;
+        $query = 'UPDATE orders SET ';
+        foreach ($this->_changed_fields as $field) {
+            $query .= "{$field} = '{$this->_order_data[$field]}', ";
+        }
+        $query = substr($query, 0, -2);
+        $query .= " WHERE order_id = '{$this->order_id}'";
+        $db->exec($query);
+        $this->_changed_fields = [];
+    }
 
-    $order_data['order_id'] = time() . mt_rand();
-    $order_data['status'] = 'CREATED';
-    $order_data['payment_datetime'] = null;
-    $order_data['payment_amount'] = null;
+    /**
+     * Get order by id
+     *
+     * @param $order_id int
+     * @return Order|false
+     */
+    public static function get($order_id)
+    {
+        global $db;
 
-    $phone = preg_replace('/[^0-9]/', '', $order_data['phone']);
-    $phone = substr($phone, -10);
-    $order_data['phone'] = $phone;
+        $order = $db->query("SELECT * FROM orders WHERE order_id = '{$order_id}'")->fetchArray(SQLITE3_ASSOC);
+        if (! $order) {
+            return false;
+        }
 
-    $db->exec("INSERT INTO orders (
+        return new Order($order);
+    }
+
+    /**
+     * @param $order_data array
+     * @return Order saved order
+     */
+    public static function create($order_data)
+    {
+        global $db;
+
+        $order_data['order_id'] = time().mt_rand();
+        $order_data['status'] = 'CREATED';
+        $order_data['payment_datetime'] = null;
+        $order_data['payment_amount'] = null;
+
+        $phone = preg_replace('/[^0-9]/', '', $order_data['phone']);
+        $phone = substr($phone, -10);
+        $order_data['phone'] = $phone;
+
+        $db->exec("INSERT INTO orders (
       lastname, 
       order_id,
       name, 
@@ -139,16 +148,16 @@ class Order
       '{$order_data['status']}'
     )");
 
-    return new Order($order_data);
-  }
+        return new Order($order_data);
+    }
 
-  function get_full_name()
-  {
-    return "{$this->lastname} {$this->name} {$this->middlename}";
-  }
+    public function get_full_name()
+    {
+        return "{$this->lastname} {$this->name} {$this->middlename}";
+    }
 
-  function toArray()
-  {
-    return $this->_order_data;
-  }
+    public function toArray()
+    {
+        return $this->_order_data;
+    }
 }
