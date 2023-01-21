@@ -36,6 +36,8 @@ class Pushka
                 'date' => CONFIG['PUSHKA_SESSION_DATE'],
             ],
             'payment' => [
+                'id'=>$order->payment_id,
+                'rrn'=>$order->payment_id,
                 'date' => $order->payment_datetime,
                 'amount' => (string) $order->payment_amount,
             ],

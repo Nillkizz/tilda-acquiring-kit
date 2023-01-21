@@ -24,6 +24,7 @@ namespace App\Models;
  * @property string $form_id
  * @property string $status
  * @property string $ticket_id
+ * @property string $payment_id
  * @property array $_order_data Order data private field
  * @property array $_changed_fields Changed fields private field, used for update query
  */
@@ -82,6 +83,15 @@ class Order
         if (empty($this->ticket_id)) {
             $this->_order_data['ticket_id'] = $ticket_id;
             $this->_changed_fields[] = 'ticket_id';
+        }
+    }
+
+    // Set payment_id if empty
+    public function set_payment_id($payment_id)
+    {
+        if (empty($this->payment_id)) {
+            $this->_order_data['payment_id'] = $payment_id;
+            $this->_changed_fields[] = 'payment_id';
         }
     }
 

@@ -17,6 +17,7 @@ $db->exec('
   status TEXT,
   ticket_id TEXT,
 
+  payment_id TEXT,
   payment_datetime TEXT,
   payment_amount INT,
 
