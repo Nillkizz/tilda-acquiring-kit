@@ -1,5 +1,5 @@
 {
-  "name": "nillkizz/form_acquiring",
+  "name": "alx.n.smith/form_acquiring",
   "description": "Custom form acquiring handler",
   "type": "project",
   "autoload": {
@@ -13,7 +13,7 @@
   },
   "authors": [
     {
-      "name": "nillkizz",
+      "name": "alx.n.smith",
       "email": "alx.n.smith@gmail.com"
     }
   ],
