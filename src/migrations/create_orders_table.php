@@ -6,6 +6,7 @@ $db->exec('
   CREATE TABLE orders (
   id INTEGER PRIMARY KEY NOT NULL, 
   order_id TEXT,
+  rrn TEXT,
   lastname TEXT,
   name TEXT,
   middlename TEXT,
