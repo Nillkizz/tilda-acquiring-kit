@@ -50,4 +50,4 @@ define('CONFIG', [
 
 global $db;
 
-$db = new \SQLite3(CONFIG['DB_PATH']);
+$db = new SQLite3(CONFIG['DB_PATH']);

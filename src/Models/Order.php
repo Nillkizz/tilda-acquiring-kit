@@ -5,12 +5,7 @@ namespace App\Models;
 /**
  * Order model class
  *
- * @method static Order get(int $id) Get order by id from database
- * @method static void save() Save order to database
- * @method static Order create(array $order_data) Create order from array
  * @method static void set_status(string $status) Set order status
- * @method static array toArray() Get order data as array
- * @method string get_full_name() Get full name of order owner
  *
  * @property int $id
  * @property string $order_id
@@ -26,14 +21,20 @@ namespace App\Models;
  * @property string $status
  * @property string $ticket_id
  * @property string $payment_id
+ * @property string $payment_datetime
+ * @property integer $payment_amount
  * @property array $_order_data Order data private field
  * @property array $_changed_fields Changed fields private field, used for update query
+ * @property array $changed_fields Changed fields public field, used for update query
  */
 class Order
 {
-  private $_order_data;
+  /**
+   * @var array|mixed
+   */
+  private array $_order_data;
 
-  private $_changed_fields;
+  private array $_changed_fields;
 
   const editable = [
     'status',
@@ -61,18 +62,19 @@ class Order
   }
 
   // Magic setter method for order_data
-  public function __set($name, $value)
+  public function __set(string $name, int|string $value)
   {
     // If name starts with _, then it is a private property
     if (substr($name, 0, 2) == '_') {
       $this->$name = $value;
-
       return;
     }
 
+    // If is not editable field, then return false
     if (!in_array($name, self::editable)) {
       return;
     }
+
     $this->_order_data[$name] = $value;
     $this->_changed_fields[] = $name;
 
@@ -80,7 +82,7 @@ class Order
   }
 
   // Set ticket_id if empty
-  public function set_ticket_id($ticket_id)
+  public function set_ticket_id($ticket_id): void
   {
     if (empty($this->ticket_id)) {
       $this->_order_data['ticket_id'] = $ticket_id;
@@ -89,7 +91,7 @@ class Order
   }
 
   // Set payment_id if empty
-  public function set_payment_id($payment_id)
+  public function set_payment_id(string $payment_id): void
   {
     if (empty($this->payment_id)) {
       $this->_order_data['payment_id'] = $payment_id;
@@ -98,7 +100,7 @@ class Order
   }
 
   // Set payment_id if empty
-  public function set_rrn(string $rrn)
+  public function set_rrn(string $rrn): void
   {
     if (empty($this->rrn)) {
       $this->_order_data['rrn'] = $rrn;
@@ -106,17 +108,24 @@ class Order
     }
   }
 
+  public static function update_rrn_for_order(string $order_id, string $rrn): void
+  {
+    $order = static::get($order_id);
+    $order->rrn = $rrn;
+    $order->save();
+  }
+
   // Save method for update all fields
-  public function save()
+  public function save(): void
   {
     global $db;
 
     $query = 'UPDATE orders SET ';
     foreach ($this->_changed_fields as $field) {
-      $query .= "{$field} = '{$this->_order_data[$field]}', ";
+      $query .= "$field = '{$this->_order_data[$field]}', ";
     }
     $query = substr($query, 0, -2);
-    $query .= " WHERE order_id = '{$this->order_id}'";
+    $query .= " WHERE order_id = '$this->order_id'";
     $db->exec($query);
     $this->_changed_fields = [];
   }
@@ -127,11 +136,11 @@ class Order
    * @param $order_id int
    * @return Order|false
    */
-  public static function get($order_id)
+  public static function get(int $order_id): Order|false
   {
     global $db;
 
-    $order = $db->query("SELECT * FROM orders WHERE order_id = '{$order_id}'")->fetchArray(SQLITE3_ASSOC);
+    $order = $db->query("SELECT * FROM orders WHERE order_id = '$order_id'")->fetchArray(SQLITE3_ASSOC);
     if (!$order) {
       return false;
     }
@@ -139,7 +148,7 @@ class Order
     return new Order($order);
   }
 
-  public static function get_last()
+  public static function get_last(): Order|false
   {
     global $db;
 
@@ -155,7 +164,7 @@ class Order
    * @param $order_data array
    * @return Order saved order
    */
-  public static function create($order_data)
+  public static function create(array $order_data): Order
   {
     global $db;
 
@@ -196,20 +205,14 @@ class Order
     return new Order($order_data);
   }
 
-  public function get_full_name()
+  public function get_full_name(): string
   {
-    return "{$this->lastname} {$this->name} {$this->middlename}";
+    return "$this->lastname $this->name $this->middlename";
   }
 
-  public function toArray()
+  public function toArray(): array
   {
     return $this->_order_data;
   }
 
-  public static function update_rrn_for_order(string $order_id, string $rrn)
-  {
-    $order = static::get($order_id);
-    $order->rrn = $rrn;
-    $order->save();
-  }
 }

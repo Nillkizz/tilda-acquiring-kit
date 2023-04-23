@@ -3,10 +3,10 @@
 use App\Models\Order;
 use App\Services\Payments\Tinkoff;
 
-function parse_order()
+function parse_order(): array
 {
   if (!has_post_fields(['lastname', 'name', 'middlename', 'Phone', 'Email', 'payment_method', 'tildaspec-formid', 'orderType'])) {
-    throw new \Exception('Not all required fields are set');
+    throw new Exception('Not all required fields are set');
   }
   $order = map_array($_POST, [
     'lastname' => 'lastname',
@@ -26,9 +26,9 @@ function parse_order()
  * Gets order array and return response date for frontend
  *
  * @param $order array
- * @return array
+ * @return Object
  */
-function process_tinkoff_payment($order)
+function process_tinkoff_payment(array $order): object
 {
   $item = CONFIG['ITEMS'][$order['order_type']];
   $payment_data = Tinkoff::get_payment_data($order, $item);
@@ -37,7 +37,7 @@ function process_tinkoff_payment($order)
   return $response_data;
 }
 
-function order_status_changed($order_id, $status)
+function order_status_changed($order_id, $status): void
 {
   $order = Order::get($order_id);
   $order->set_status($status);

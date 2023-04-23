@@ -21,30 +21,30 @@ if (has_get_fields(['update_status'])) {
   $order = Order::get($order_id);
 
   if (!$order) {
-    w_log("order.php | Update_status | Order({$order_id}) not found", 'Error');
+    w_log("order.php | Update_status | Order($order_id) not found", 'Error');
     return;
   }
 
   $order->status = $status;
-  w_log("order.php | Update_status | Order({$order_id}) status updated: " . $status);
+  w_log("order.php | Update_status | Order($order_id) status updated: " . $status);
 
   if ($status == 'CONFIRMED') {
-    w_log("order.php | Update_status | Confirm Order({$order_id})");
+    w_log("order.php | Update_status | Confirm Order($order_id)");
     $order->payment_datetime = time();
     $order->payment_amount = $data['Amount'] / 100;
     $response = Pushka::register_ticket($order);
     $order->set_ticket_id($response['id']);
-    w_log("order.php | Update_status | Order({$order_id}) Confirmed | Ticket registered: " . $order->ticket_id);
+    w_log("order.php | Update_status | Order($order_id) Confirmed | Ticket registered: " . $order->ticket_id);
   } elseif ($status == 'REJECTED') {
-    w_log("order.php | Update_status | Order({$order_id}) rejected");
+    w_log("order.php | Update_status | Order($order_id) rejected");
   } elseif ($status == 'REFUNDED') {
-    w_log("order.php | Update_status | Refund Order({$order_id})");
+    w_log("order.php | Update_status | Refund Order($order_id)");
     $response = Pushka::refund_ticket($order);
-    w_log("order.php | Update_status | Order({$order_id}) Refunded | Ticket refunded: " . $order->ticket_id);
+    w_log("order.php | Update_status | Order($order_id) Refunded | Ticket refunded: " . $order->ticket_id);
   }
 
   $order->save();
-  w_log("order.php | Update_status | Order({$order_id}) saved");
+  w_log("order.php | Update_status | Order($order_id) saved");
 }
 
 if (has_get_fields(['create'])) {
@@ -59,7 +59,7 @@ if (has_get_fields(['create'])) {
   w_log('order.php | Set order payment_id: ' . $response['PaymentId']);
   $order->set_payment_id($response['PaymentId']);
   $order->save();
-  w_log("order.php | Order {$order->order_id} saved after set order id");
+  w_log("order.php | Order $order->order_id saved after set order id");
 
   header('Content-Type: application/json');
   $response_json = json_encode($response);

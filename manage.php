@@ -13,12 +13,12 @@ if ($command == 'migrate') {
     unlink('db.sqlite');
   }
 
-  $db = new \SQLite3('db.sqlite');
+  $db = new SQLite3('db.sqlite');
   include 'src/migrations/create_orders_table.php';
 }
 
 if ($command == 'show_last_order') {
   print_r(Order::get_last());
 }
-if ($command == 'check_last_order') {
-}
+//if ($command == 'check_last_order') {
+//}

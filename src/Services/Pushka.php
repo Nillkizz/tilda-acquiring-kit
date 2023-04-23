@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use Exception;
 
 class Pushka
 {
@@ -43,18 +44,18 @@ class Pushka
       ],
     ];
     $url = CONFIG['PUSHKA_URL'] . '/tickets';
-    w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Request: " . print_r($request, true));
+    w_log("src/Services/Pushka.php | Register_ticket | Order($order->order_id) | Request: " . print_r($request, true));
 
     ['status' => $status, 'response' => $response] = self::post($url, $request, static::authenticate_headers());
     $response = json_decode($response, true);
 
-    w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Response status: " . $status . "\nResponse: " . print_r($response, true));
+    w_log("src/Services/Pushka.php | Register_ticket | Order($order->order_id) | Response status: " . $status . "\nResponse: " . print_r($response, true));
     if ($status == 400) {
-      w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Request Error: " . ' [' . $response['code'] . '] ' . $response['description']);
-      throw new \Exception('Pushka API error: ' . $response['description']);
+      w_log("src/Services/Pushka.php | Register_ticket | Order($order->order_id) | Request Error: " . ' [' . $response['code'] . '] ' . $response['description']);
+      throw new Exception('Pushka API error: ' . $response['description']);
     }
 
-    w_log("src/Services/Pushka.php | Register_ticket | Order({$order->order_id}) | Response: " . print_r($response, true));
+    w_log("src/Services/Pushka.php | Register_ticket | Order($order->order_id) | Response: " . print_r($response, true));
 
     return $response;
   }
@@ -62,28 +63,27 @@ class Pushka
   public static function refund_ticket(Order $order)
   {
     $ticket_id = $order->ticket_id;
-    w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | ticket_id: " . $ticket_id);
-    $url = CONFIG['PUSHKA_URL'] . '/tickets';
-    $url = CONFIG['PUSHKA_URL'] . "/tickets/{$ticket_id}/refund";
+    w_log("src/Services/Pushka.php | Cancel_order | Order($order->order_id) | ticket_id: " . $ticket_id);
+    $url = CONFIG['PUSHKA_URL'] . "/tickets/$ticket_id/refund";
     $body = [
       'refund_date' => time(),
       'refund_reason' => 'Посещение отменено',
     ];
-    w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | Request: " . print_r($body, true));
+    w_log("src/Services/Pushka.php | Cancel_order | Order($order->order_id) | Request: " . print_r($body, true));
     ['status' => $status, 'response' => $response] = self::put($url, $body, static::authenticate_headers());
     $response = json_decode($response, true);
-    w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | Response status: " . $status . "\nResponse: " . print_r($response, true));
+    w_log("src/Services/Pushka.php | Cancel_order | Order($order->order_id) | Response status: " . $status . "\nResponse: " . print_r($response, true));
     if ($status == 400) {
-      w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | Request Error: " . ' [' . $response['code'] . '] ' . $response['description']);
-      throw new \Exception('Pushka API error: ' . $response['description']);
+      w_log("src/Services/Pushka.php | Cancel_order | Order($order->order_id) | Request Error: " . ' [' . $response['code'] . '] ' . $response['description']);
+      throw new Exception('Pushka API error: ' . $response['description']);
     }
 
-    w_log("src/Services/Pushka.php | Cancel_order | Order({$order->order_id}) | Response: " . print_r($response, true));
+    w_log("src/Services/Pushka.php | Cancel_order | Order($order->order_id) | Response: " . print_r($response, true));
 
     return $response;
   }
 
-  public static function request($url, $opts = ['method' => 'GET', 'headers' => []])
+  public static function request($url, $opts = ['method' => 'GET', 'headers' => []]): array
   {
     extract($opts);
     $curl = curl_init();
@@ -113,17 +113,17 @@ class Pushka
     return ['status' => $status, 'response' => $response];
   }
 
-  public static function get($url, $headers = [])
+  public static function get($url, $headers = []): array
   {
     return self::request($url, ['method' => 'GET', 'headers' => $headers]);
   }
 
-  public static function post($url, $body, $headers = [])
+  public static function post($url, $body, $headers = []): array
   {
     return self::request($url, ['method' => 'POST', 'body' => $body, 'headers' => $headers]);
   }
 
-  public static function put($url, $data = [], $headers = [])
+  public static function put($url, $data = [], $headers = []): array
   {
     return self::request($url, ['method' => 'PUT', 'body' => $data, 'headers' => $headers]);
   }

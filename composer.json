@@ -19,6 +19,8 @@
   ],
   "require": {
     "vlucas/phpdotenv": "^5.4",
-    "monolog/monolog": "^3.2"
+    "monolog/monolog": "^3.2",
+    "ext-curl": "*",
+    "ext-sqlite3": "*"
   }
 }
