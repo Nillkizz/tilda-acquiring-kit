@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Order;
+
 include 'config.php';
 
 $command = $argv[1] ?? null;
@@ -13,4 +15,10 @@ if ($command == 'migrate') {
 
     $db = new \SQLite3('db.sqlite');
     include 'src/migrations/create_orders_table.php';
+}
+
+if ($command == 'show_last_order') {
+  print_r(Order::get_last());
+}
+if ($command == 'check_last_order') {
 }
