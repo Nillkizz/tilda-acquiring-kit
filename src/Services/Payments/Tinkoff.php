@@ -4,46 +4,46 @@ namespace App\Services\Payments;
 
 class Tinkoff
 {
-    public static function get_terminal_key()
-    {
-        return $_ENV['TINKOFF_TERMINAL_KEY'];
-    }
+  public static function get_terminal_key()
+  {
+    return $_ENV['TINKOFF_TERMINAL_KEY'];
+  }
 
-    public static function get_terminal_password()
-    {
-        return $_ENV['TINKOFF_TERMINAL_PASSWORD'];
-    }
+  public static function get_terminal_password()
+  {
+    return $_ENV['TINKOFF_TERMINAL_PASSWORD'];
+  }
 
-    public static function get_payment_data($order, $item)
-    {
-        $payment_data = [
-            'TerminalKey' => self::get_terminal_key(),
+  public static function get_payment_data($order, $item)
+  {
+    $payment_data = [
+      'TerminalKey' => self::get_terminal_key(),
+      'Amount' => $item['price'],
+      'OrderId' => $order['order_id'],
+      'DATA' => [
+        'Phone' => $order['phone'],
+        'Email' => $order['email'],
+      ],
+      'Receipt' => [
+        'Email' => $order['email'],
+        'Phone' => $order['phone'],
+        'Taxation' => CONFIG['TINKOFF_TAXATION'],
+        'Items' => [
+          [
+            'Name' => $item['name'],
+            'Price' => $item['price'],
+            'Quantity' => 1.00,
             'Amount' => $item['price'],
-            'OrderId' => $order['order_id'],
-            'DATA' => [
-                'Phone' => $order['phone'],
-                'Email' => $order['email'],
-            ],
-            'Receipt' => [
-                'Email' => $order['email'],
-                'Phone' => $order['phone'],
-                'Taxation' => CONFIG['TINKOFF_TAXATION'],
-                'Items' => [
-                    [
-                        'Name' => $item['name'],
-                        'Price' => $item['price'],
-                        'Quantity' => 1.00,
-                        'Amount' => $item['price'],
-                        'PaymentMethod' => 'full_prepayment',
-                        'PaymentObject' => 'service',
-                        'Tax' => $item['tax'],
-                    ],
-                ],
-            ],
-        ];
+            'PaymentMethod' => 'full_prepayment',
+            'PaymentObject' => 'service',
+            'Tax' => $item['tax'],
+          ],
+        ],
+      ],
+    ];
 
-        return $payment_data;
-    }
+    return $payment_data;
+  }
 
   public static function init_payment($payment_data)
   {
@@ -63,8 +63,8 @@ class Tinkoff
     curl_close($ch);
     $response_data = json_decode($result);
 
-        return $response_data;
-    }
+    return $response_data;
+  }
 
   public static function check_order($order_id)
   {
@@ -108,8 +108,8 @@ class Tinkoff
       'PaymentURL' => $response_data->PaymentURL,
     ];
 
-        return $response_data;
-    }
+    return $response_data;
+  }
 
   public static function process_payment_status()
   {
@@ -117,6 +117,7 @@ class Tinkoff
     $payment_status = $_POST['Status'];
     order_status_changed($order_id, $payment_status);
   }
+
   public static function sign_request_data(array $data): array
   {
     $copy_data = array_filter($data, function ($v) {
